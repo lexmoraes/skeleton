@@ -1,0 +1,37 @@
+<div class="login-shell">
+  <header class="header">
+    <div class="logo">
+      <div class="logo-mark"><i class="fa-solid fa-cube"></i></div>
+      Skeleton
+    </div>
+    <p>{{ 'auth.login.subtitle' | transloco }}</p>
+  </header>
+
+  <form class="card" [formGroup]="form" (ngSubmit)="submit()">
+    <label class="field">
+      <span class="field-label">{{ 'auth.login.identifierLabel' | transloco }}</span>
+      <input type="text" formControlName="identifier" autocomplete="username" placeholder="ana.silva@empresa.com" />
+      @if (form.controls.identifier.invalid && form.controls.identifier.touched) {
+        <span class="field-error">{{ 'auth.login.identifierError' | transloco }}</span>
+      }
+    </label>
+
+    <label class="field">
+      <span class="field-label">{{ 'auth.login.passwordLabel' | transloco }}</span>
+      <input type="password" formControlName="password" autocomplete="current-password" placeholder="••••••••" />
+      @if (form.controls.password.invalid && form.controls.password.touched) {
+        <span class="field-error">{{ 'auth.login.passwordError' | transloco }}</span>
+      }
+    </label>
+
+    <button type="submit" class="btn btn-primary" [disabled]="submitting()">
+      @if (submitting()) {
+        <div class="spinner"></div>
+        <span>{{ 'auth.login.submitting' | transloco }}</span>
+      } @else {
+        <i class="fa-solid fa-right-to-bracket"></i>
+        <span>{{ 'auth.login.submit' | transloco }}</span>
+      }
+    </button>
+  </form>
+</div>

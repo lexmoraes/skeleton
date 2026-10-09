@@ -1,0 +1,27 @@
+{
+  "common": {
+    "cancel": "Cancelar",
+    "save": "Salvar",
+    "saving": "Salvando...",
+    "loading": "Carregando...",
+    "close": "Fechar",
+    "edit": "Editar",
+    "loadError": "Não foi possível carregar a lista."
+  },
+  "nav": {
+    "logout": "Sair"
+  },
+  "auth": {
+    "login": {
+      "subtitle": "Entre com seu e-mail, usuário ou matrícula para acessar o painel.",
+      "identifierLabel": "E-mail, usuário ou matrícula",
+      "identifierError": "Informe seu e-mail, usuário ou matrícula.",
+      "passwordLabel": "Senha",
+      "passwordError": "Informe sua senha.",
+      "submit": "Entrar",
+      "submitting": "Entrando...",
+      "success": "Login realizado com sucesso.",
+      "error": "Credenciais inválidas. Verifique e tente novamente."
+    }
+  }
+}

@@ -1,0 +1,77 @@
+@use '@angular/material' as mat;
+@import '@angular/cdk/overlay-prebuilt.css';
+
+:root {
+  --bg-primary: #0b0c10;
+  --bg-surface: #15161d;
+  --bg-elevated: #1c1d26;
+  --bg-hover: #252630;
+  --border-subtle: #2a2c3a;
+  --border-hover: #3f4252;
+
+  --accent: #e5101d;
+  --accent-glow: rgba(229, 16, 29, 0.35);
+  --accent-hover: #ff2a36;
+
+  --text-primary: #f0f2f8;
+  --text-secondary: #9ea3b0;
+  --text-muted: #5e6275;
+
+  --success: #2ecc71;
+  --success-bg: rgba(46, 204, 113, 0.12);
+  --warning: #f1c40f;
+  --danger: #e5101d;
+
+  --radius: 14px;
+  --radius-sm: 10px;
+  --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  @include mat.theme((
+    color: (
+      theme-type: dark,
+      primary: mat.$red-palette,
+      tertiary: mat.$red-palette,
+    ),
+    typography: Inter,
+    density: 0,
+  ));
+
+  // Re-point Material's system tokens at this app's own dark palette instead
+  // of the generic M3 dark surfaces, so Material components (datepicker,
+  // form fields, etc.) blend into the existing hand-rolled theme.
+  --mat-sys-surface: var(--bg-elevated);
+  --mat-sys-surface-container: var(--bg-elevated);
+  --mat-sys-surface-container-high: var(--bg-hover);
+  --mat-sys-on-surface: var(--text-primary);
+  --mat-sys-on-surface-variant: var(--text-secondary);
+  --mat-sys-primary: var(--accent);
+  --mat-sys-on-primary: #fff;
+  --mat-sys-outline: var(--border-subtle);
+  --mat-sys-outline-variant: var(--border-subtle);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+button {
+  font-family: inherit;
+}

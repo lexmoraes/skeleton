@@ -1,0 +1,27 @@
+{
+  "common": {
+    "cancel": "Cancel",
+    "save": "Save",
+    "saving": "Saving...",
+    "loading": "Loading...",
+    "close": "Close",
+    "edit": "Edit",
+    "loadError": "Could not load the list."
+  },
+  "nav": {
+    "logout": "Sign out"
+  },
+  "auth": {
+    "login": {
+      "subtitle": "Sign in with your email, username or registration number to access the dashboard.",
+      "identifierLabel": "Email, username or registration number",
+      "identifierError": "Enter your email, username or registration number.",
+      "passwordLabel": "Password",
+      "passwordError": "Enter your password.",
+      "submit": "Sign in",
+      "submitting": "Signing in...",
+      "success": "Signed in successfully.",
+      "error": "Invalid credentials. Check and try again."
+    }
+  }
+}

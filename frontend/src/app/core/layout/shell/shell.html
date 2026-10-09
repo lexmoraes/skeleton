@@ -1,0 +1,46 @@
+<div class="shell">
+  <aside class="sidenav">
+    <div class="brand">
+      <div class="brand-mark"><i class="fa-solid fa-cube"></i></div>
+      <span>Skeleton</span>
+    </div>
+
+    <nav class="nav-list">
+      @for (item of navItems; track item.path) {
+        <a class="nav-item" [routerLink]="item.path" routerLinkActive="active">
+          <i [class]="item.icon"></i>
+          <span>{{ item.labelKey | transloco }}</span>
+        </a>
+      }
+    </nav>
+
+    <div class="lang-switch">
+      @for (lang of langs; track lang) {
+        <button
+          type="button"
+          class="lang-button"
+          [class.active]="activeLang() === lang"
+          (click)="setLang(lang)"
+        >
+          {{ lang }}
+        </button>
+      }
+    </div>
+
+    @if (currentUser(); as user) {
+      <div class="user-box">
+        <div class="user-info">
+          <i class="fa-solid fa-circle-user"></i>
+          <span>{{ user.first_name || user.username }}</span>
+        </div>
+        <button type="button" class="logout-button" (click)="logout()" [title]="'nav.logout' | transloco">
+          <i class="fa-solid fa-right-from-bracket"></i>
+        </button>
+      </div>
+    }
+  </aside>
+
+  <main class="content">
+    <router-outlet />
+  </main>
+</div>
