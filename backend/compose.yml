@@ -1,0 +1,63 @@
+# Local development services only (Postgres + SeaweedFS + Redis). Django and
+# Celery run on the host from the venv / PyCharm — see README.md. Credentials
+# here are dev-only defaults and match skeleton.config.example.
+#
+# Every port is bound to 127.0.0.1, so these weak passwords are never exposed
+# to the rest of the network. Host ports are chosen not to collide with other
+# projects' usual defaults (Postgres 5432, Redis 6379).
+name: skeleton-dev
+
+services:
+  postgres_db:
+    image: postgres:17-alpine
+    container_name: skeleton_postgres_local
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "127.0.0.1:5436:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  seaweedfs:
+    image: chrislusf/seaweedfs:4.48
+    container_name: skeleton_seaweedfs_local
+    # Single-process cluster: master + volume + filer + S3 gateway (:8333).
+    command: server -s3 -ip.bind=0.0.0.0
+    environment:
+      # With no -s3.config file, these become the S3 admin identity.
+      AWS_ACCESS_KEY_ID: seaweedfs
+      AWS_SECRET_ACCESS_KEY: seaweedfs
+    ports:
+      - "127.0.0.1:8333:8333"
+    volumes:
+      - seaweedfs_data:/data
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O-", "http://127.0.0.1:8333/healthz"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:8.8-alpine
+    container_name: skeleton_redis_local
+    ports:
+      - "127.0.0.1:6380:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_data:
+  seaweedfs_data:
+  redis_data:
