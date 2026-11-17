@@ -15,6 +15,7 @@
     "login": {
       "subtitle": "Entre com seu e-mail, usuário ou matrícula para acessar o painel.",
       "identifierLabel": "E-mail, usuário ou matrícula",
+      "identifierPlaceholder": "ana.silva@empresa.com",
       "identifierError": "Informe seu e-mail, usuário ou matrícula.",
       "passwordLabel": "Senha",
       "passwordError": "Informe sua senha.",

@@ -15,6 +15,7 @@
     "login": {
       "subtitle": "Sign in with your email, username or registration number to access the dashboard.",
       "identifierLabel": "Email, username or registration number",
+      "identifierPlaceholder": "jane.doe@company.com",
       "identifierError": "Enter your email, username or registration number.",
       "passwordLabel": "Password",
       "passwordError": "Enter your password.",
