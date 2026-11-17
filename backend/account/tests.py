@@ -2,6 +2,8 @@ from unittest import mock
 
 from channels.layers import get_channel_layer
 from channels.testing import WebsocketCommunicator
+from django.core.cache import cache
+from django.core.exceptions import ValidationError
 from django.test import TestCase, override_settings
 from rest_framework.test import APITestCase
 from rest_framework_simplejwt.tokens import AccessToken
@@ -28,6 +30,8 @@ class LoginTests(APITestCase):
     url = '/api/account/login/'
 
     def setUp(self):
+        # Throttle counters live in the (local-memory) cache; start each test clean.
+        cache.clear()
         self.user = make_user()
 
     def login(self, identifier, password='s3cret-pass'):
@@ -62,6 +66,26 @@ class LoginTests(APITestCase):
         # The rotated-in refresh token is the one that keeps working.
         second = self.client.post('/api/account/login/refresh/', {'refresh': first.data['refresh']}, format='json')
         self.assertEqual(second.status_code, 200)
+
+    def test_login_is_throttled(self):
+        statuses = [self.login('ana', password='wrong').status_code for _ in range(11)]
+        self.assertEqual(statuses[:10], [401] * 10)
+        self.assertEqual(statuses[10], 429)
+
+
+class AccountUserModelTests(TestCase):
+    def test_email_username_and_registration_number_are_unique_case_insensitively(self):
+        make_user(registration_number='AB-2024')
+        for overrides in (
+            {'email': 'ANA@example.com'},
+            {'username': 'ANA'},
+            {'registration_number': 'ab-2024'},
+        ):
+            fields = {'email': 'x@example.com', 'username': 'x', 'registration_number': 'X-1', **overrides}
+            with self.subTest(**overrides):
+                user = models.AccountUser(**fields)
+                with self.assertRaises(ValidationError):
+                    user.validate_constraints()
 
 
 class AccountUserViewSetTests(APITestCase):

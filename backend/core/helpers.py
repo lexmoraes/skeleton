@@ -1,10 +1,7 @@
 from datetime import timedelta
 from functools import cache
 
-import boto3
 from asgiref.sync import async_to_sync
-from botocore.client import Config
-from botocore.exceptions import ClientError
 from channels.db import database_sync_to_async
 from channels.layers import get_channel_layer
 from django.conf import settings
@@ -16,7 +13,6 @@ from rest_framework.exceptions import APIException
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.settings import api_settings as jwt_settings
 from rest_framework_simplejwt.tokens import AccessToken
-
 
 # --- Errors -----------------------------------------------------------------
 
@@ -93,6 +89,11 @@ _ensured_buckets: set[str] = set()
 
 @cache
 def get_storage_client():
+    # Imported lazily so a project that drops object storage (and boto3)
+    # doesn't break on — or pay for — the import.
+    import boto3
+    from botocore.client import Config
+
     return boto3.client(
         's3',
         endpoint_url=settings.SEAWEEDFS_S3_ENDPOINT,
@@ -108,6 +109,8 @@ def ensure_bucket(bucket: str | None = None) -> None:
     bucket = bucket or settings.SEAWEEDFS_BUCKET
     if bucket in _ensured_buckets:
         return
+    from botocore.exceptions import ClientError
+
     client = get_storage_client()
     try:
         client.head_bucket(Bucket=bucket)

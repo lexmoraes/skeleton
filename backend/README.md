@@ -140,6 +140,15 @@ python manage.py test
 
 Precisa do Postgres do `compose.yml` de pé; Redis e SeaweedFS não (os testes de WebSocket usam um channel layer em memória).
 
+## Padrões de segurança
+
+- **Toda view exige login** (`DEFAULT_PERMISSION_CLASSES = IsAuthenticated`). Endpoint público precisa declarar `permission_classes = [AllowAny]` explicitamente.
+- **`DEBUG`** só liga sozinho em dev (quando `skeleton.config` existe); em container é `False` salvo `DJANGO_DEBUG=True`. Com `DEBUG=False`, o backend **não sobe** sem uma `DJANGO_SECRET_KEY` de 50+ caracteres.
+- **HTTPS**: `DJANGO_HTTPS_ONLY=True` liga redirect, HSTS e cookies `Secure` — só use com TLS de fato na frente.
+- **Login** limitado a 10 tentativas/min por IP (`throttle_scope = 'login'`).
+- **Paginação**: `?page=` e `?page_size=` (máx. 200), via `core.pagination.DefaultPagination`.
+- **Unicidade sem diferenciar maiúsculas** de e-mail, username e matrícula (o login também não diferencia).
+
 ## Adicionando seu primeiro app de verdade
 
 1. `python manage.py startapp meuapp`, adicione `'meuapp.apps.MeuappConfig'` em `INSTALLED_APPS` (`config/settings.py`).
