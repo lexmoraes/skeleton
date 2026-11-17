@@ -1,0 +1,11 @@
+.venv
+skeleton.config
+media/
+staticfiles/
+__pycache__/
+*.pyc
+.idea/
+.vscode/
+.DS_Store
+celerybeat-schedule*
+.ruff_cache/

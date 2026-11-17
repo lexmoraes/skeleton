@@ -1,0 +1,16 @@
+.venv
+__pycache__/
+*.pyc
+.idea/
+.vscode/
+.git/
+.gitignore
+media/
+staticfiles/
+skeleton.config
+*.md
+.env
+Dockerfile
+.dockerignore
+
+celerybeat-schedule*
