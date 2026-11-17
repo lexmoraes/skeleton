@@ -15,7 +15,10 @@ export class LocaleDateAdapter extends NativeDateAdapter {
     if (value instanceof Date) return value;
     if (typeof value !== 'string' || !value.trim()) return null;
 
-    const parts = value.trim().split(/[/\-.]/).map((p) => parseInt(p, 10));
+    const parts = value
+      .trim()
+      .split(/[/\-.]/)
+      .map((p) => parseInt(p, 10));
     if (parts.length !== 3 || parts.some((p) => Number.isNaN(p))) {
       return new Date(NaN);
     }

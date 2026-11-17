@@ -8,7 +8,9 @@ class BuildObjectPathTests(SimpleTestCase):
         class Owner:
             name = 'Acme Corp'
 
-        self.assertEqual(helpers.build_object_path(Owner(), 'reports', 'q1 report.pdf'), 'acme-corp/reports/q1_report.pdf')
+        self.assertEqual(
+            helpers.build_object_path(Owner(), 'reports', 'q1 report.pdf'), 'acme-corp/reports/q1_report.pdf',
+        )
         self.assertEqual(helpers.build_object_path('acme', 'avatars', '../../etc/passwd'), 'acme/avatars/....etcpasswd')
 
 

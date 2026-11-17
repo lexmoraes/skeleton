@@ -136,6 +136,7 @@ python -c "import polib; polib.pofile('locale/pt_BR/LC_MESSAGES/django.po').save
 
 ```bash
 python manage.py test
+ruff check .            # lint (config em pyproject.toml)
 ```
 
 Precisa do Postgres do `compose.yml` de pé; Redis e SeaweedFS não (os testes de WebSocket usam um channel layer em memória).
