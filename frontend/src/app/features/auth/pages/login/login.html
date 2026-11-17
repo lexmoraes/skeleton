@@ -10,7 +10,12 @@
   <form class="card" [formGroup]="form" (ngSubmit)="submit()">
     <label class="field">
       <span class="field-label">{{ 'auth.login.identifierLabel' | transloco }}</span>
-      <input type="text" formControlName="identifier" autocomplete="username" placeholder="ana.silva@empresa.com" />
+      <input
+        type="text"
+        formControlName="identifier"
+        autocomplete="username"
+        [placeholder]="'auth.login.identifierPlaceholder' | transloco"
+      />
       @if (form.controls.identifier.invalid && form.controls.identifier.touched) {
         <span class="field-error">{{ 'auth.login.identifierError' | transloco }}</span>
       }
@@ -18,7 +23,12 @@
 
     <label class="field">
       <span class="field-label">{{ 'auth.login.passwordLabel' | transloco }}</span>
-      <input type="password" formControlName="password" autocomplete="current-password" placeholder="••••••••" />
+      <input
+        type="password"
+        formControlName="password"
+        autocomplete="current-password"
+        placeholder="••••••••"
+      />
       @if (form.controls.password.invalid && form.controls.password.touched) {
         <span class="field-error">{{ 'auth.login.passwordError' | transloco }}</span>
       }
