@@ -59,6 +59,9 @@ class LoginTests(APITestCase):
         self.assertEqual(first.status_code, 200)
         reused = self.client.post('/api/account/login/refresh/', {'refresh': refresh}, format='json')
         self.assertEqual(reused.status_code, 401)
+        # The rotated-in refresh token is the one that keeps working.
+        second = self.client.post('/api/account/login/refresh/', {'refresh': first.data['refresh']}, format='json')
+        self.assertEqual(second.status_code, 200)
 
 
 class AccountUserViewSetTests(APITestCase):
@@ -81,6 +84,14 @@ class AccountUserViewSetTests(APITestCase):
         response = self.client.get('/api/account/users/', {'identifier': 'ANA'})
         self.assertEqual(response.status_code, 200)
         self.assertEqual([u['id'] for u in response.data['results']], [self.user.id])
+
+    def test_listing_honors_page_size_query_param(self):
+        admin = make_user(email='admin@example.com', username='admin', registration_number='1', is_staff=True)
+        self.client.force_authenticate(admin)
+        response = self.client.get('/api/account/users/', {'page_size': 1})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['count'], 2)
+        self.assertEqual(len(response.data['results']), 1)
 
 
 class NotifyAccountUpdatedReceiverTests(TestCase):

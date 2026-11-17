@@ -208,8 +208,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # Django REST Framework
 
 REST_FRAMEWORK = {
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 20,
+    # ?page=&page_size= (max 200) — matches the frontend BaseFilter.
+    'DEFAULT_PAGINATION_CLASS': 'core.pagination.DefaultPagination',
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
     ],

@@ -10,6 +10,7 @@ export const authGuard: CanActivateFn = () => {
   if (auth.isAuthenticated()) {
     return true;
   }
-  router.navigate(['/login']);
-  return false;
+  // Drop any stale tokens/user left behind by an expired session.
+  auth.logout();
+  return router.createUrlTree(['/login']);
 };
