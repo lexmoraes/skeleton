@@ -1,0 +1,8 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Backend completo" type="CompoundRunConfigurationType">
+    <toRun name="Django (Daphne) :8002" type="Python.DjangoServer" />
+    <toRun name="Celery worker" type="PythonConfigurationType" />
+    <toRun name="Celery beat" type="PythonConfigurationType" />
+    <method v="2" />
+  </configuration>
+</component>
