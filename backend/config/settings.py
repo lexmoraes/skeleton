@@ -9,15 +9,20 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
 import configparser
+import importlib.util
 import os
 from datetime import timedelta
 from pathlib import Path
+
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 config = configparser.ConfigParser()
-config.read(os.path.join(BASE_DIR, "skeleton.config"))
+# The local INI file only exists on dev machines (it's in .dockerignore), so
+# its presence doubles as the "this is local development" signal below.
+LOCAL_CONFIG_FOUND = bool(config.read(os.path.join(BASE_DIR, "skeleton.config")))
 
 
 def env_or_config(env_key, config_key, default=None, section='database'):
@@ -31,19 +36,31 @@ def env_or_config(env_key, config_key, default=None, section='database'):
     return default
 
 
-# Quick-start development settings - unsuitable for production
+def as_bool(value) -> bool:
+    return str(value).strip().lower() in ('1', 'true', 'yes', 'on')
+
+
+def env_list(env_key: str) -> list[str]:
+    return [item.strip() for item in os.environ.get(env_key, '').split(',') if item.strip()]
+
+
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get(
-    'DJANGO_SECRET_KEY',
-    'django-insecure-change-me-before-any-real-deployment',
-)
-
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
+# Fail safe: DEBUG is only on by default for local dev (skeleton.config
+# present). Containers/servers get DEBUG=False unless DJANGO_DEBUG says so.
+DEBUG = as_bool(env_or_config('DJANGO_DEBUG', 'DEBUG', default=LOCAL_CONFIG_FOUND, section='django'))
 
-ALLOWED_HOSTS = [h.strip() for h in os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',') if h.strip()]
+# SECURITY WARNING: keep the secret key used in production secret!
+INSECURE_DEV_SECRET_KEY = 'django-insecure-dev-only-never-use-in-production'
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY') or INSECURE_DEV_SECRET_KEY
+if not DEBUG and (SECRET_KEY == INSECURE_DEV_SECRET_KEY or len(SECRET_KEY) < 50):
+    raise ImproperlyConfigured(
+        'DJANGO_SECRET_KEY must be set to a long random value (50+ chars) when DEBUG is off. '
+        'Generate one with: python -c "import secrets; print(secrets.token_urlsafe(50))"'
+    )
+
+ALLOWED_HOSTS = env_list('DJANGO_ALLOWED_HOSTS')
 
 
 # Application definition
@@ -60,7 +77,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
-    'django_extensions',
     'django_filters',
     'corsheaders',
     'simple_history',
@@ -69,6 +85,11 @@ INSTALLED_APPS = [
     'account.apps.AccountConfig',
     # Add your own apps here.
 ]
+
+# Dev-only tooling (shell_plus, show_urls, …): installed by
+# requirements-dev.txt, absent from the production image.
+if importlib.util.find_spec('django_extensions'):
+    INSTALLED_APPS.append('django_extensions')
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -170,7 +191,7 @@ STORAGES = {
     },
 }
 
-DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # Media files
@@ -210,9 +231,18 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 REST_FRAMEWORK = {
     # ?page=&page_size= (max 200) — matches the frontend BaseFilter.
     'DEFAULT_PAGINATION_CLASS': 'core.pagination.DefaultPagination',
+    # Secure by default: every endpoint requires a logged-in user unless the
+    # view opts out explicitly (permission_classes = [AllowAny]).
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',
+        'rest_framework.permissions.IsAuthenticated',
     ],
+    # Only views that set throttle_scope are throttled (see account LoginView).
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.ScopedRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'login': os.environ.get('DJANGO_LOGIN_THROTTLE_RATE', '10/min'),
+    },
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',
@@ -237,10 +267,56 @@ SIMPLE_JWT = {
 
 # CORS (Angular dev server + whatever origin the frontend container serves in prod)
 
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:4200',
-    'http://127.0.0.1:4200',
-] + [o.strip() for o in os.environ.get('DJANGO_CORS_ALLOWED_ORIGINS', '').split(',') if o.strip()]
+CORS_ALLOWED_ORIGINS = env_list('DJANGO_CORS_ALLOWED_ORIGINS')
+if DEBUG:
+    # `ng serve` (port in frontend/angular.json). Usually unneeded since its
+    # proxy makes calls same-origin, but handy when hitting the API directly.
+    CORS_ALLOWED_ORIGINS += ['http://localhost:4202', 'http://127.0.0.1:4202']
+
+# Full origins (scheme + host) allowed to POST forms with the CSRF cookie —
+# needed for the Django admin when it's served behind a proxy over HTTPS.
+CSRF_TRUSTED_ORIGINS = env_list('DJANGO_CSRF_TRUSTED_ORIGINS')
+
+
+# Production hardening. Nginx (frontend container) sets X-Forwarded-Proto,
+# so Django knows when the original request was HTTPS.
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'DENY'
+
+# Opt in once the site is really served over HTTPS (TLS on nginx or on a load
+# balancer in front of it): redirects HTTP, sends HSTS, marks cookies Secure.
+# Left off by default because the stock compose.yml serves plain HTTP on :80.
+HTTPS_ONLY = as_bool(os.environ.get('DJANGO_HTTPS_ONLY', 'False'))
+if HTTPS_ONLY:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = int(os.environ.get('DJANGO_HSTS_SECONDS', '31536000'))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = as_bool(os.environ.get('DJANGO_HSTS_INCLUDE_SUBDOMAINS', 'False'))
+    SECURE_HSTS_PRELOAD = False
+
+
+# Logging: everything to stdout/stderr (docker compose logs picks it up).
+
+LOG_LEVEL = os.environ.get('DJANGO_LOG_LEVEL', 'INFO').upper()
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'default': {'format': '{asctime} {levelname} {name}: {message}', 'style': '{'},
+    },
+    'handlers': {
+        'console': {'class': 'logging.StreamHandler', 'formatter': 'default'},
+    },
+    'root': {'handlers': ['console'], 'level': LOG_LEVEL},
+    'loggers': {
+        'django': {'handlers': ['console'], 'level': LOG_LEVEL, 'propagate': False},
+        # 4xx/5xx with tracebacks — always worth seeing.
+        'django.request': {'handlers': ['console'], 'level': 'WARNING', 'propagate': False},
+    },
+}
 
 
 # Celery (task queues and the beat schedule live in config/celery.py)

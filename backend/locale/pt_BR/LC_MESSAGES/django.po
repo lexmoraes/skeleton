@@ -32,3 +32,12 @@ msgstr "Permissões"
 
 msgid "Important dates"
 msgstr "Datas importantes"
+
+msgid "A user with that email address already exists."
+msgstr "Já existe um usuário com esse e-mail."
+
+msgid "A user with that username already exists."
+msgstr "Já existe um usuário com esse nome de usuário."
+
+msgid "A user with that registration number already exists."
+msgstr "Já existe um usuário com essa matrícula."

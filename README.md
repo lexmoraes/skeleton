@@ -97,7 +97,8 @@ Da raiz deste repositório:
 
 ```bash
 cp .env.example .env
-# edite o .env: DB_PASSWORD, DJANGO_SECRET_KEY, DJANGO_ALLOWED_HOSTS, SEAWEEDFS_SECRET_KEY
+# edite o .env: DB_PASSWORD, DJANGO_SECRET_KEY (obrigatória, 50+ caracteres — sem ela o backend não sobe),
+# DJANGO_ALLOWED_HOSTS, SEAWEEDFS_SECRET_KEY; com HTTPS na frente, DJANGO_HTTPS_ONLY=True
 docker compose up -d --build
 docker compose exec backend python manage.py createsuperuser
 ```
@@ -139,5 +140,7 @@ Pra depurar algo que não passa pelo Nginx (ex.: o `/admin/` do Django, que não
 
 - **URLs pré-assinadas do SeaweedFS** apontam pro endereço interno (`seaweedfs:8333` em produção); pro navegador baixar direto, publique o S3 e configure um endpoint público.
 - **`/media/` em produção** é repassado ao Django, que só serve arquivos com `DEBUG=True` — pra uploads, prefira o SeaweedFS (`core/helpers.py`).
-- **O login não tem throttling** e o JWT fica no `localStorage`; avalie os dois antes de expor o sistema publicamente.
+- **O JWT fica no `localStorage`** (vulnerável a XSS que rode na página). No WebSocket ele vai na query string (`?token=`); o Nginx já registra `/ws/` sem query string, mas outros proxies na frente podem registrar.
+- **Fontes e ícones vêm de CDN** (Google Fonts e Font Awesome no cdnjs, este com SRI). Pra não depender de terceiros, empacote-os via npm e remova os hosts da CSP em `frontend/nginx-security-headers.conf`.
+- **Throttling do login** (10/min por IP, `DJANGO_LOGIN_THROTTLE_RATE`) usa o cache local do processo: vale por processo do Daphne. Com várias réplicas, configure `CACHES` com Redis.
 - **O `/admin/` do Django não passa pelo Nginx** (veja acima como acessar).

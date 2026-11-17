@@ -1,3 +1,7 @@
+[django]
+# Defaults to True whenever this file exists (local dev); env DJANGO_DEBUG wins.
+DEBUG = True
+
 [database]
 DB_NAME = postgres
 DB_USER = postgres

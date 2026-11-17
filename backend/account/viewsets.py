@@ -7,7 +7,11 @@ from account import filters, models, serializers
 
 
 class LoginView(TokenObtainPairView):
+    """Public (simplejwt's views set no permission/authentication classes).
+    Throttled per client IP — rate in REST_FRAMEWORK['DEFAULT_THROTTLE_RATES']."""
+
     serializer_class = serializers.LoginSerializer
+    throttle_scope = 'login'
 
 
 class AccountUserViewSet(viewsets.ReadOnlyModelViewSet):
