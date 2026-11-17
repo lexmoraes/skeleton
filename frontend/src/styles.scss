@@ -26,15 +26,17 @@
   --radius-sm: 10px;
   --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
-  @include mat.theme((
-    color: (
-      theme-type: dark,
-      primary: mat.$red-palette,
-      tertiary: mat.$red-palette,
-    ),
-    typography: Inter,
-    density: 0,
-  ));
+  @include mat.theme(
+    (
+      color: (
+        theme-type: dark,
+        primary: mat.$red-palette,
+        tertiary: mat.$red-palette,
+      ),
+      typography: Inter,
+      density: 0,
+    )
+  );
 
   // Re-point Material's system tokens at this app's own dark palette instead
   // of the generic M3 dark surfaces, so Material components (datepicker,
@@ -56,12 +58,17 @@
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   height: 100%;
 }
 
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family:
+    'Inter',
+    system-ui,
+    -apple-system,
+    sans-serif;
   background: var(--bg-primary);
   color: var(--text-primary);
   min-height: 100vh;

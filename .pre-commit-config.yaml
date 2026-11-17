@@ -1,0 +1,17 @@
+# Install once (after `git init`): pip install -r backend/requirements-dev.txt && pre-commit install
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.0
+    hooks:
+      - id: ruff
+        args: [--fix]
+        files: ^backend/
+        # Uses backend/pyproject.toml.
+  - repo: local
+    hooks:
+      - id: prettier
+        name: prettier (frontend)
+        entry: bash -c 'cd frontend && npx prettier --check "src/**/*.{ts,html,scss,json}"'
+        language: system
+        files: ^frontend/src/
+        pass_filenames: false

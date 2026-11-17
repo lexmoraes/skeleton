@@ -33,7 +33,12 @@
           <i class="fa-solid fa-circle-user"></i>
           <span>{{ user.first_name || user.username }}</span>
         </div>
-        <button type="button" class="logout-button" (click)="logout()" [title]="'nav.logout' | transloco">
+        <button
+          type="button"
+          class="logout-button"
+          (click)="logout()"
+          [title]="'nav.logout' | transloco"
+        >
           <i class="fa-solid fa-right-from-bracket"></i>
         </button>
       </div>

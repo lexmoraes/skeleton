@@ -87,9 +87,11 @@ O `backend/compose.yml` usa o nome de projeto fixo `skeleton-dev` (volumes `skel
 ### Testes
 
 ```bash
-(cd backend && python manage.py test)      # precisa só do Postgres de dev de pé
-(cd frontend && npm test)
+(cd backend && python manage.py test && ruff check .)      # precisa só do Postgres de dev de pé
+(cd frontend && npm test && npm run format:check)
 ```
+
+O mesmo roda no CI (`.github/workflows/ci.yml`) a cada push/PR. Com o repositório em git, `pre-commit install` (de `requirements-dev.txt`) roda ruff + prettier antes de cada commit.
 
 ## Produção (Docker)
 

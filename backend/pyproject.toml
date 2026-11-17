@@ -1,0 +1,14 @@
+# Tooling config only (the backend isn't packaged). Run: ruff check .
+# (Lint only — `ruff format` isn't enforced, to keep the hand-formatted style.)
+
+[tool.ruff]
+target-version = "py312"
+line-length = 120
+extend-exclude = ["*/migrations/*"]
+
+[tool.ruff.lint]
+# pyflakes, pycodestyle, isort, bugbear, pyupgrade, django-specific checks
+select = ["F", "E", "W", "I", "B", "UP", "DJ"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["account", "config", "core"]
